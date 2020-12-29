@@ -64,6 +64,12 @@ class EigenSpace:
         return self.imgData - self.avgFace
 
 
+    def projectFace(self, imgData):
+        newPhi = imgData - self.avgFace
+        width, height = self.images[0].size
+        newProj = np.dot(newPhi, self.eigenFaces)
+        return np.reshape(np.dot(newProj, np.transpose(self.eigenFaces)) + self.avgFace, (height, width))
+
     def predictFace(self, imgData, threshold = 7000):
         # center the new face
         newPhi = imgData - self.avgFace

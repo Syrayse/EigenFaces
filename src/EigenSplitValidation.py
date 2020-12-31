@@ -1,24 +1,21 @@
 from scipy.spatial import distance
-from PIL import Image
 import random
 
 from EigenSpace import *
 
 class EigenSplitValidation:
-    def __init__(self, imgsUrls, percentage, eigenFun = eigenWithSVD, distanceFun = distance.euclidean, kFinder = 'MIN-THRESHOLD'):
+    def __init__(self, imgsUrls, percentage, eigenFun = eigenWithSVD, distanceFun = distance.euclidean, kFinder = 'MIN-THRESHOLD',  useOptimalK = True):
         self._percentage = percentage
         self._urls = imgsUrls.copy()
         random.shuffle(self._urls)
         testData, trainData = self._partition(percentage)
-        eSpace = EigenSpace(trainData, eigenFun, distanceFun, kFinder)
+        eSpace = EigenSpace(trainData, eigenFun, distanceFun, kFinder, useOptimalK)
         self._accuracies = []
         self._errorCases = []
         matchingElems = 0;
 
         for j in range(0, len(testData)):
-            testImage = Image.open(f'{testData[j]["url"]}').convert('L')
-
-            predTag, _ = eSpace.predictFace(testImage.getdata())
+            predTag, _ = eSpace.predictFace(testData[j]['img'])
 
             if testData[j]['tag'] == predTag:
                 matchingElems += 1

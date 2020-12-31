@@ -54,11 +54,28 @@ class EigenSpace:
         return baseK, confidence
 
     def _findOptimalK_ELBOW(self):
-        """
-        TODO: find optimal K using optimized elbow-finding algorithm      
-        @delagatedTo: Benjamim.  
-        """
-        return None,None
+        trace = sum(self.eigenValues)
+
+        confidence = 0
+        pointDistance = []
+        confidencePerPoint = []
+        n = self.eigenValues.shape
+        n = n[0]-1
+        
+        aux = 0
+        p1 = np.array([0, self.eigenValues[0]])
+        p2 = np.array([n, self.eigenValues[n]])
+        for x in self.eigenValues:   
+            p3 = np.array([aux, x])               
+            pointDistance.append(abs(np.cross(p2-p1,p3-p1)/np.linalg.norm(p2-p1)))
+            confidence = confidence + self.eigenValues[aux]/trace
+            confidencePerPoint.append(confidence)
+            aux += 1
+
+        baseK = pointDistance.index(max(pointDistance))
+        confidence = confidencePerPoint[baseK]
+        
+        return baseK, confidence
 
     def _centerFaces(self):
         return self.imgData - self.avgFace

@@ -1,0 +1,18 @@
+#!/usr/bin/env python3
+import os
+import cv2
+
+
+if __name__ == '__main__':
+    pathToImages = 'images/custom/'
+    destPat = 'images/custom_processed/'
+    filesToProc = [f for f in os.listdir(pathToImages)]
+
+    for file in filesToProc:
+        im = cv2.imread(pathToImages +  file, 0)
+
+        # create a CLAHE object (Arguments are optional).
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+        cl1 = clahe.apply(im)
+
+        cv2.imwrite(destPat + file, cl1)

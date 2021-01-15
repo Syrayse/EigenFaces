@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+import whatimage
+import pyheif
+import io
+from PIL import Image
+import os
+import re
+import cv2
+
+
+if __name__ == '__main__':
+    pathToImages = 'images/custom/'
+    destPat = 'images/custom2/'
+    filesToProc = [f for f in os.listdir(pathToImages)]
+    ratioSet = set() 
+
+    for file in filesToProc:
+        im = cv2.imread(pathToImages +  file)
+        # resize image
+        dsize = (320,int(320*1.33))
+        output = cv2.resize(im, dsize)
+        cv2.imwrite(destPat + file, output)

@@ -25,7 +25,7 @@ class EigenCrossValidation:
             matchingElems = 0;
 
             for j in range(0, len(testData)):
-                predTag, _ = eSpace.predictFace(testData[j]['img'])
+                predTag, _, _ = eSpace.predictFace(testData[j]['img'])
 
                 if testData[j]['tag'] == predTag:
                     matchingElems += 1

@@ -153,28 +153,20 @@ class EigenSpace:
         avgFace = np.mean(np.array(data),0)
         # get image dimension 
         width, height = self.images[0].size
-        # show person's mean eigenface
-        #plt.matshow(np.reshape(avgFace, (height, width)), cmap='gray')
         # reconstruct face
         reconstructedFace = self.reconstructFace(index)
         # turn reconstructed face into an image
         data = np.reshape(reconstructedFace, (height, width))
         reconstructedImage = Image.fromarray(data)
         # adjust reconstructed image brightness
-        #enhancer = ImageEnhance.Brightness(reconstructedImage)
-        #newFace = self.replacePixels(occludedImage, reconstructedImageA, left, top, right, bottom)
-        #reconstructedImageA = enhancer.enhance(factor)
         im2 = reconstructedImage.point(lambda p: p * factor)
-        newFace = self.replacePixels(occludedImage, im2, left, top, right, bottom)
         # replace occlusion
-        #newFace = self.replacePixels(occludedImage, reconstructedImage, left, top, right, bottom)
+        newFace = self.replacePixels(occludedImage, im2, left, top, right, bottom)
         # show images
         plt.matshow(np.reshape(occludedImage, (height, width)), cmap='gray')
         plt.title('Occluded Image')
-        self.plotEigenFace(index)
-        plt.title('Closest Eigenface')
         plt.matshow(np.reshape(reconstructedImage, (height, width)), cmap='gray')
-        plt.title('Closest Eigenface Reconstructed')
+        plt.title('Reconstructed Face')
         plt.matshow(np.reshape(newFace, (height, width)), cmap='gray')
         plt.title('Oclusion Prediction')
 

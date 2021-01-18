@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 from scipy.spatial import distance
 from collections import defaultdict
 from EigenCrossValidation import EigenCrossValidation
-
+from pprint import pprint
 from EigenSpace import *
-
+from PIL import Image
 
 class ModelerView:
     def __init__(self, imgsUrls, crossK = 5, eigenFun = eigenWithSVD, distanceFun = distance.euclidean, kFinder = 'MIN-THRESHOLD',  useOptimalK = True):
@@ -44,6 +44,7 @@ class ModelerView:
             print('invalid view mode')
         else:
             self.viewEigenSpace[viewName].plotEigenValues()
+           
             
     def plotEigenFace(self, viewName, idxFace):   
         if not viewName in self.viewEigenSpace:
@@ -51,11 +52,17 @@ class ModelerView:
         else:
             self.viewEigenSpace[viewName].plotEigenFace(idxFace)
 
-    def accuracy(self, viewName):     
+    def accuracyP(self, viewName):     
         if not viewName in self.viewEigenSpace:
             print('invalid view mode')
         else:
-            self.crossValidation[viewName].accuracy()
+            print(self.crossValidation[viewName].accuracy())
+
+    '''def f(self, img):   
+        newPhi = img
+        width, height = img.size
+        plt.matshow(np.reshape(newPhi, (height, width)))'''
+       
 
     def accuracy(self):
         return np.mean([cval.accuracy() for _, cval in self.crossValidation.items()])

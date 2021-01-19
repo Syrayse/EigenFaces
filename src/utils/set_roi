@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+import cv2
+import numpy as np
+import os
+
+#== Parameters =======================================================================
+pathToImages = 'images/custom/'
+destPat = 'images/custom_roi/'
+filesToProc = [f for f in os.listdir(pathToImages)]
+
+#== Processing =======================================================================
+
+#-- Read image -----------------------------------------------------------------------
+for file in filesToProc:
+    img = cv2.imread(pathToImages + file,0)
+    img = img[40:350,65:265]
+    cv2.imwrite(destPat + file, img)

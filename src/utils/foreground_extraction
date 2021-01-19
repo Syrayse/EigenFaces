@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+import cv2
+import numpy as np
+import os
+
+#== Parameters =======================================================================
+BLUR = 21
+CANNY_THRESH_1 = 10
+CANNY_THRESH_2 = 200
+MASK_DILATE_ITER = 10
+MASK_ERODE_ITER = 10
+MASK_COLOR = (0.0,0.0,1.0) # In BGR format
+pathToImages = 'images/custom/'
+destPat = 'images/custom_foreground/'
+filesToProc = [f for f in os.listdir(pathToImages)]
+
+#== Processing =======================================================================
+
+#-- Read image -----------------------------------------------------------------------
+for file in filesToProc:
+    img = cv2.imread(pathToImages + file,0)
+
+    #-- Edge detection -------------------------------------------------------------------
+    edges = cv2.Canny(img, CANNY_THRESH_1, CANNY_THRESH_2)
+    edges = cv2.dilate(edges, None)
+    edges = cv2.erode(edges, None)
+
+    #-- Find contours in edges, sort by area ---------------------------------------------
+    contour_info = []
+    contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+    # Previously, for a previous version of cv2, this line was: 
+    #  contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+    # Thanks to notes from commenters, I've updated the code but left this note
+    for c in contours:
+        contour_info.append((
+            c,
+            cv2.isContourConvex(c),
+            cv2.contourArea(c),
+        ))
+    contour_info = sorted(contour_info, key=lambda c: c[2], reverse=True)
+    max_contour = contour_info[0]
+
+    #-- Create empty mask, draw filled polygon on it corresponding to largest contour ----
+    # Mask is black, polygon is white
+    mask = np.zeros(edges.shape)
+    cv2.fillConvexPoly(mask, max_contour[0], (255))
+
+    #-- Smooth mask, then blur it --------------------------------------------------------
+    mask = cv2.dilate(mask, None, iterations=MASK_DILATE_ITER)
+    mask = cv2.erode(mask, None, iterations=MASK_ERODE_ITER)
+    mask = cv2.GaussianBlur(mask, (BLUR, BLUR), 0)
+
+    #-- Blend masked img into MASK_COLOR background --------------------------------------
+    img         = img.astype('float32') / 255.0                 #  for easy blending
+    cv2.imwrite(destPat + file, mask*img)

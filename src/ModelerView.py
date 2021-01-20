@@ -31,7 +31,7 @@ class ModelerView:
         if not viewName in self.viewEigenSpace:
             print('invalid view mode')
         else:
-            self.viewEigenSpace[viewName].predictFace(imgData, threshold)
+            print(self.viewEigenSpace[viewName].predictFace(imgData, threshold))
             
     def plotAverageFace(self, viewName):
         if not viewName in self.viewEigenSpace:
@@ -57,12 +57,6 @@ class ModelerView:
             print('invalid view mode')
         else:
             print(self.crossValidation[viewName].accuracy())
-
-    '''def f(self, img):   
-        newPhi = img
-        width, height = img.size
-        plt.matshow(np.reshape(newPhi, (height, width)))'''
-       
 
     def accuracy(self):
         return np.mean([cval.accuracy() for _, cval in self.crossValidation.items()])

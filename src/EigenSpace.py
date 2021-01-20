@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import distance
 from PIL import Image
+from inspect import signature
 
 def getImageByUrl(urlName):
     return Image.open(f'{urlName}').convert('L').getdata()
@@ -12,11 +13,14 @@ def eigenWithSVD(phi):
     return eFaces, prop
 
 def eigenWithMatrixFact(phi):
-    """
-    TODO: find eigen values using matrix factorization.
-    @delagatedTo: Tiago.
-    """
-    return None,None
+    L = np.matmul(phi, phi.T)
+    valprop_sc, vectprop_sc = np.linalg.eig(L)
+    return np.dot(phi.T, vectprop_sc), valprop_sc
+
+def mahalanobis(x, y, eigenvalues, k):
+    if(k == -1):
+        k = len(eigenvalues)
+    return np.sum(np.divide((x[:k]-y[:k])**2, eigenvalues[:k]))
 
 class EigenSpace:
     def __init__(self, imgUrls, eigenFun = eigenWithSVD, distanceFun = distance.euclidean, kFinder = 'MIN-THRESHOLD', useOptimalK = True):
@@ -36,6 +40,7 @@ class EigenSpace:
                 self.optimalK, self.optimalConfidence = self._applyKFinder(kFinder)
                 self.optimalEigenFaces = self.eigenFaces[:,0:self.optimalK]
             else:                
+                self.optimalK = self.eigenFaces.shape[1]
                 self.optimalEigenFaces = self.eigenFaces
 
             self._distanceFun = distanceFun
@@ -105,7 +110,11 @@ class EigenSpace:
         newProj = np.dot(newPhi, self.optimalEigenFaces)
 
         # calculate distance between each initial entry and new projection 
-        dist = [self._distanceFun(self.baseProjections[i], newProj) for i in range(self.size)]
+        argIn = len(signature(self._distanceFun).parameters)
+        if(argIn <= 3):
+            dist = [self._distanceFun(self.baseProjections[i], newProj) for i in range(self.size)]
+        else:
+            dist = [self._distanceFun(self.baseProjections[i], newProj, self.eigenValues, self.optimalK) for i in range(self.size)]
         
         # Select closest eigen face
         d_min = np.min(dist)
@@ -138,7 +147,7 @@ class EigenSpace:
         if idxFace < self.size:
             eigenData = self.eigenFaces.T[idxFace]
             width, height = self.images[idxFace].size
-            plt.matshow(np.reshape(eigenData, (height, width)), cmap='gray')
+            plt.matshow(np.real(np.reshape(eigenData, (height, width))), cmap='gray')
 
     # Predict occluded part of a face 
     def predictOcclusion(self, imgFile, left, top, right, bottom, factor):
